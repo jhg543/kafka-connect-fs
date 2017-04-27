@@ -1,6 +1,7 @@
 package com.github.mmolimar.kafka.connect.fs.file.reader;
 
 import com.github.mmolimar.kafka.connect.fs.file.Offset;
+import com.google.common.base.Strings;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.kafka.connect.data.Schema;
@@ -25,6 +26,8 @@ public class TextFileReader extends AbstractFileReader<TextFileReader.TextRecord
 
     public static final String FILE_READER_TEXT_FIELD_NAME_VALUE = FILE_READER_SEQUENCE_FIELD_NAME_PREFIX + "value";
 
+    private static final String FILE_READER_ENCODING = FILE_READER_TEXT + "encoding";
+
     private final TextOffset offset;
     private String currentLine;
     private boolean finished = false;
@@ -33,7 +36,16 @@ public class TextFileReader extends AbstractFileReader<TextFileReader.TextRecord
 
     public TextFileReader(FileSystem fs, Path filePath, Map<String, Object> config) throws IOException {
         super(fs, filePath, new TxtToStruct(), config);
-        this.reader = new LineNumberReader(new InputStreamReader(fs.open(filePath)));
+        String encoding = null;
+        if (config.get(FILE_READER_ENCODING) != null) {
+            encoding = config.get(FILE_READER_ENCODING).toString();
+        }
+
+        if (Strings.isNullOrEmpty(encoding)) {
+            encoding = "UTF-8";
+        }
+
+        this.reader = new LineNumberReader(new InputStreamReader(fs.open(filePath),encoding));
         this.offset = new TextOffset(0);
     }
 

@@ -11,8 +11,8 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <kafka.version>0.10.1.0</kafka.version>
-        <confluent.version>3.1.1</confluent.version>
+        <kafka.version>0.10.2.0</kafka.version>
+        <confluent.version>3.2.0</confluent.version>
         <hadoop.version>2.7.3</hadoop.version>
         <avro.version>1.8.1</avro.version>
         <parquet.version>1.9.0</parquet.version>
@@ -43,11 +43,13 @@
             <artifactId>hadoop-client</artifactId>
             <version>${hadoop.version}</version>
         </dependency>
+        <!--
         <dependency>
             <groupId>org.apache.avro</groupId>
             <artifactId>avro-tools</artifactId>
             <version>${avro.version}</version>
         </dependency>
+        -->
         <dependency>
             <groupId>org.apache.avro</groupId>
             <artifactId>avro</artifactId>

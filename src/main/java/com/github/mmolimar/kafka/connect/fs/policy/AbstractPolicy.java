@@ -190,27 +190,30 @@ abstract class AbstractPolicy implements Policy {
 
     @Override
     public FileReader offer(FileMetadata metadata, OffsetStorageReader offsetStorageReader) throws IOException {
+        final String path = metadata.getPath();
         Map<String, Object> partition = new HashMap<String, Object>() {{
-            put("path", metadata.getPath());
+            put("path", path);
             //TODO manage blocks
             //put("blocks", metadata.getBlocks().toString());
         }};
 
         FileSystem current = fileSystems.stream()
-                .filter(fs -> metadata.getPath().startsWith(fs.getWorkingDirectory().toString()))
+                .filter(fs -> path.startsWith(fs.getWorkingDirectory().toString()))
                 .findFirst().orElse(null);
 
         FileReader reader;
         try {
             reader = ReflectionUtils.makeReader((Class<? extends FileReader>) conf.getClass(FsSourceTaskConfig.FILE_READER_CLASS),
-                    current, new Path(metadata.getPath()), conf.originals());
+                    current, new Path(path), conf.originals());
         } catch (Throwable t) {
-            throw new ConnectException("An error has ocurred when creating reader for file: " + metadata.getPath(), t);
+            throw new ConnectException("An error has ocurred when creating reader for file: " + path, t);
         }
 
         Map<String, Object> offset = offsetStorageReader.offset(partition);
         if (offset != null && offset.get("offset") != null) {
-            reader.seek(() -> (Long) offset.get("offset"));
+            final Long offsetNumber = (Long) offset.get("offset");
+            log.trace("Offset for file {} is {}", path, offsetNumber);
+            reader.seek(() -> offsetNumber);
         }
         return reader;
     }
